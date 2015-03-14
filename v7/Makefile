@@ -202,14 +202,11 @@ $(OUTPUT)/builder.img: files/* $(OUTPUT)/docker.tar $(REPOS_PRESENT) $(KEYS_PRES
 	--output $(OUTPUT)/builder.img \
 	--format qcow2 \
 	--size $(SIZE)G \
-	--install rsync,nfs-utils,sudo,openssh-server,openssh-clients,screen,tar \
+	--install rsync,nfs-utils,sudo,openssh-server,openssh-clients,tar \
 	--root-password file:files/password \
 	--run-command 'yum erase -y vim-minimal || true' \
-	--run-command 'yum install -y puppet || true' \
 	--run-command 'yum install -y docker || true' \
 	--run-command 'systemctl enable docker || true' \
-	--upload $(OUTPUT)/docker.tar:/root/ \
-	--run-command 'mkdir /root/docker/ && tar -C /root/docker/ -xf /root/docker.tar && rm /root/docker.tar' \
 	--upload files/yum.sh:/root/yum.sh \
 	--run-command '/root/yum.sh install $(PACKAGES) && rm /root/yum.sh' \
 	--run-command 'yum update -y' \
@@ -224,7 +221,7 @@ $(OUTPUT)/builder.img: files/* $(OUTPUT)/docker.tar $(REPOS_PRESENT) $(KEYS_PRES
 	# https://www.redhat.com/archives/libguestfs/2014-January/msg00183.html
 	# https://github.com/libguestfs/libguestfs/commit/20a4bfde9628cfeb8bea441cab7dcc94843b34e3
 	qemu-system-x86_64 -machine accel=kvm:tcg -cpu host -m 512 -drive file=$(OUTPUT)/builder.img,format=qcow2,if=virtio -no-reboot -serial stdio -nographic || (rm $(OUTPUT)/builder.img; false)
-	reset	# TODO: qemu-system-x86_64 borks the terminal :(
+	#reset	# TODO: qemu-system-x86_64 borks the terminal :(
 
 #
 #	convert
